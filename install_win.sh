@@ -3,6 +3,7 @@ pyinstaller ffrotate_app.py ^
     --collect-data gradio_client ^
     --collect-data safehttpx ^
     --collect-data groovy ^
+    --collect-data webview ^
     --onefile ^
     --windowed ^
     --clean ^
