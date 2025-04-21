@@ -1,0 +1,9 @@
+name: ffrotate
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13.2
+  - ffmpeg
+  - pip:
+    - gradio==5.23.0
+    - pywebview==5.4

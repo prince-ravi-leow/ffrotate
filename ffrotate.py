@@ -14,7 +14,7 @@ def check_ffmpeg():
     raise RuntimeError("FFmpeg is not installed or not in the system path.")
 
 
-def rotate_video(input_video, rotation, custom_angle):
+def rotate_video(input_video, rotation, custom_angle=None):
     """Rotate a video losslessly using FFmpeg."""
     ffmpeg_path = check_ffmpeg()
 
@@ -51,7 +51,8 @@ def rotate_video(input_video, rotation, custom_angle):
         "ultrafast",
         output_video,
     ]
-
+    print("FFmpeg command:")
+    print(" ".join(command))
     try:
         subprocess.run(
             command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
