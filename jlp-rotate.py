@@ -8,6 +8,14 @@ from tqdm.tk import tqdm
 from PIL import Image, ImageTk
 import tempfile
 
+def get_ffmpeg_path():
+    if not sys.platform.startswith("win"):
+        ffmpeg_path = shutil.which("ffmpeg")
+    else:
+        ffmpeg_path = shutil.which("ffmpeg.exe")
+    if not ffmpeg_path:
+        raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
+
 def get_default_output_path():
     if sys.platform.startswith("win"):
         from ctypes import windll
@@ -17,10 +25,9 @@ def get_default_output_path():
         return os.path.join(os.path.expanduser("~"), "Movies", "rotated")
 
 def get_video_duration(input_path):
-    ffmpeg_path = shutil.which("ffmpeg")
-    if not ffmpeg_path:
-        raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
-    
+
+    ffmpeg_path = get_ffmpeg_path()
+
     command = [
         ffmpeg_path,
         "-i",
@@ -42,7 +49,7 @@ def get_video_duration(input_path):
     return h * 3600 + m * 60 + s
 
 def extract_rotated_frame(input_path, rotation, custom_angle):
-    ffmpeg_path = shutil.which("ffmpeg")
+    ffmpeg_path = get_ffmpeg_path()
     if not ffmpeg_path:
         raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
 
@@ -81,9 +88,7 @@ def extract_rotated_frame(input_path, rotation, custom_angle):
     return temp_file.name
 
 def rotate_video(input_path, rotation, custom_angle, output_dir):
-    ffmpeg_path = shutil.which("ffmpeg")
-    if not ffmpeg_path:
-        raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
+    ffmpeg_path = get_ffmpeg_path()
 
     base, ext = os.path.splitext(os.path.basename(input_path))
     output_filename = f"{base}_rotated{ext}"
