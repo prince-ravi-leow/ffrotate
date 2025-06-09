@@ -10,6 +10,8 @@ import tempfile
 
 def get_default_output_path():
     if sys.platform.startswith("win"):
+        from ctypes import windll
+        windll.shcore.SetProcessDpiAwareness(1) # add DPI awareness to avoid scaling issues on Windows
         return os.path.join(os.path.expanduser("~"), "Videos", "rotated")
     else:
         return os.path.join(os.path.expanduser("~"), "Movies", "rotated")
