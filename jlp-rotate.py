@@ -8,30 +8,18 @@ from tqdm.tk import tqdm
 from PIL import Image, ImageTk
 import tempfile
 
-def get_ffmpeg_path():
-    """Return the path to ffmpeg.exe, handling both dev and PyInstaller environments."""
-    if getattr(sys, 'frozen', False):
-        # Running in a PyInstaller bundle
-        base_path = sys._MEIPASS  # Temporary directory where files are extracted
-        ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'ffmpeg.exe' if sys.platform.startswith('win') else 'ffmpeg')
-    else:
-        # Running in development environment
-        ffmpeg_path = shutil.which('ffmpeg')
-        if not ffmpeg_path:
-            raise RuntimeError(
-                "FFmpeg not found. Please install FFmpeg and add it to your PATH, "
-                "or include ffmpeg.exe in the 'ffmpeg' folder."
-            )
-    return ffmpeg_path
-
 def get_default_output_path():
     if sys.platform.startswith("win"):
+        from ctypes import windll
+        windll.shcore.SetProcessDpiAwareness(1) # add DPI awareness to avoid scaling issues on Windows
         return os.path.join(os.path.expanduser("~"), "Videos", "rotated")
     else:
         return os.path.join(os.path.expanduser("~"), "Movies", "rotated")
 
 def get_video_duration(input_path):
-    ffmpeg_path = get_ffmpeg_path()
+    ffmpeg_path = shutil.which("ffmpeg")
+    if not ffmpeg_path:
+        raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
     
     command = [
         ffmpeg_path,
@@ -54,7 +42,9 @@ def get_video_duration(input_path):
     return h * 3600 + m * 60 + s
 
 def extract_rotated_frame(input_path, rotation, custom_angle):
-    ffmpeg_path = get_ffmpeg_path()
+    ffmpeg_path = shutil.which("ffmpeg")
+    if not ffmpeg_path:
+        raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
 
     duration = get_video_duration(input_path)
     seek_time = duration / 2
@@ -91,7 +81,9 @@ def extract_rotated_frame(input_path, rotation, custom_angle):
     return temp_file.name
 
 def rotate_video(input_path, rotation, custom_angle, output_dir):
-    ffmpeg_path = get_ffmpeg_path()
+    ffmpeg_path = shutil.which("ffmpeg")
+    if not ffmpeg_path:
+        raise RuntimeError("FFmpeg not found. Install it and add to PATH.")
 
     base, ext = os.path.splitext(os.path.basename(input_path))
     output_filename = f"{base}_rotated{ext}"
@@ -133,11 +125,6 @@ class FFRotateApp(tk.Tk):
         self.title("JLP-rotate ⭕️")
         self.geometry("600x500")
         self.resizable(False, False)
-
-        # Enable DPI awareness on Windows
-        if sys.platform.startswith("win"):
-            from ctypes import windll
-            windll.shcore.SetProcessDpiAwareness(1)
 
         # Variables
         self.input_files = []
@@ -255,10 +242,5 @@ class FFRotateApp(tk.Tk):
             messagebox.showerror("Error", str(e))
 
 if __name__ == "__main__":
-    try:
-        get_ffmpeg_path()  # Check FFmpeg availability at startup
-        app = FFRotateApp()
-        app.mainloop()
-    except RuntimeError as e:
-        messagebox.showerror("Error", str(e))
-        sys.exit(1)
+    app = FFRotateApp()
+    app.mainloop()
